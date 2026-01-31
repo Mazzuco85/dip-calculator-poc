@@ -23,7 +23,28 @@
     padding:16px;
     border:1px solid rgba(255,255,255,.12);
   }
-  h1{margin:0 0 12px; letter-spacing:.6px}
+
+  /* HEADER */
+  .header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:12px;
+  }
+  h1{
+    margin:0;
+    letter-spacing:.6px;
+  }
+  .today{
+    font-size:12px;
+    color:rgba(238,242,255,.75);
+    border:1px solid rgba(255,255,255,.18);
+    padding:6px 10px;
+    border-radius:999px;
+    background:rgba(255,255,255,.05);
+    white-space:nowrap;
+  }
+
   label{display:block; margin-top:12px; font-weight:800; color:rgba(238,242,255,.82)}
   input{
     width:100%;
@@ -81,9 +102,14 @@
 
 <body>
 <div class="app">
-  <h1>DIP CALCULATOR</h1>
 
-  <!-- Expiration Date US with auto slashes -->
+  <!-- HEADER WITH TODAY -->
+  <div class="header">
+    <h1>DIP CALCULATOR</h1>
+    <div class="today" id="todayBadge"></div>
+  </div>
+
+  <!-- Expiration Date -->
   <label for="expiration">Expiration Date</label>
   <input
     type="text"
@@ -93,27 +119,27 @@
     autocomplete="off"
     maxlength="10"
   >
-  <div class="hint">Type numbers only. Slashes will be added automatically (MM/DD/YYYY).</div>
+  <div class="hint">Type numbers only. Slashes are added automatically (MM/DD/YYYY).</div>
 
   <!-- DAYS -->
   <div class="block">
     <label for="days">Days to calculate</label>
     <input type="number" id="days" placeholder="e.g., 320" inputmode="numeric" min="0">
-    <button type="button" onclick="check('days')">CHECK (DAYS)</button>
+    <button onclick="check('days')">CHECK (DAYS)</button>
   </div>
 
   <!-- MONTHS -->
   <div class="block">
     <label for="months">Months to calculate</label>
     <input type="number" id="months" placeholder="e.g., 6" inputmode="numeric" min="0">
-    <button type="button" onclick="check('months')">CHECK (MONTHS)</button>
+    <button onclick="check('months')">CHECK (MONTHS)</button>
   </div>
 
   <!-- YEARS -->
   <div class="block">
     <label for="years">Years to calculate</label>
     <input type="number" id="years" placeholder="e.g., 1" inputmode="numeric" min="0">
-    <button type="button" onclick="check('years')">CHECK (YEARS)</button>
+    <button onclick="check('years')">CHECK (YEARS)</button>
   </div>
 
   <div id="msg" class="msg"></div>
@@ -122,125 +148,87 @@
 <script>
   const expInput = document.getElementById("expiration");
 
-  // Format digits -> MM/DD/YYYY
+  /* ---------- TODAY BADGE ---------- */
+  function startOfToday(){
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    return d;
+  }
+  document.getElementById("todayBadge").textContent =
+    "Today: " + startOfToday().toLocaleDateString("en-US");
+
+  /* ---------- DATE MASK MM/DD/YYYY ---------- */
   function formatUSDateDigits(digits){
-    const d = digits.slice(0, 8); // MMDDYYYY
-    const mm = d.slice(0, 2);
-    const dd = d.slice(2, 4);
-    const yyyy = d.slice(4, 8);
-
-    let out = "";
-    if (mm) out += mm;
-    if (dd) out += (out.length ? "/" : "") + dd;
-    if (yyyy) out += (out.length ? "/" : "") + yyyy;
-
-    // Ensure slashes in correct places when partial:
-    // "12" -> "12"
-    // "123" -> "12/3"
-    // "1234" -> "12/34"
-    // "12345" -> "12/34/5"
-    return out.replace(/^(\d{2})(\d)/, "$1/$2")
-              .replace(/^(\d{2}\/\d{2})(\d)/, "$1/$2");
+    const d = digits.slice(0,8);
+    return d
+      .replace(/^(\d{2})(\d)/, "$1/$2")
+      .replace(/^(\d{2}\/\d{2})(\d)/, "$1/$2");
   }
 
-  // Keep cursor position sane on iOS while typing/editing
   function maskExpirationInput(e){
     const el = e.target;
-
-    // current cursor position
     const start = el.selectionStart ?? el.value.length;
-
-    // count digits before cursor in the OLD value
     const old = el.value;
-    const digitsBeforeCursor = old.slice(0, start).replace(/\D/g, "").length;
-
-    // keep only digits, max 8
-    const digits = old.replace(/\D/g, "").slice(0, 8);
-
-    // new formatted value
+    const digitsBefore = old.slice(0,start).replace(/\D/g,"").length;
+    const digits = old.replace(/\D/g,"").slice(0,8);
     const formatted = formatUSDateDigits(digits);
-
-    // set new value
     el.value = formatted;
 
-    // map digit index -> caret position in formatted string
-    let caret = 0;
-    let seenDigits = 0;
-    while (caret < formatted.length && seenDigits < digitsBeforeCursor){
-      if (/\d/.test(formatted[caret])) seenDigits++;
+    let caret = 0, seen = 0;
+    while(caret < formatted.length && seen < digitsBefore){
+      if(/\d/.test(formatted[caret])) seen++;
       caret++;
     }
-
-    // place caret
     el.setSelectionRange(caret, caret);
   }
-
-  // Attach mask
   expInput.addEventListener("input", maskExpirationInput);
 
-  function parseUSDate(value) {
-    // expects MM/DD/YYYY
-    const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
-    if (!m) return null;
-
-    const month = Number(m[1]) - 1;
-    const day = Number(m[2]);
-    const year = Number(m[3]);
-
-    const d = new Date(year, month, day);
-    // reject invalid dates like 02/30/2026
-    if (d.getFullYear() !== year || d.getMonth() !== month || d.getDate() !== day) return null;
-
+  function parseUSDate(v){
+    const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v);
+    if(!m) return null;
+    const d = new Date(+m[3], +m[1]-1, +m[2]);
+    if(d.getMonth() !== (+m[1]-1) || d.getDate() !== +m[2]) return null;
     d.setHours(0,0,0,0);
     return d;
   }
 
-  function add(date, amount, unit) {
+  function add(date, amount, unit){
     const d = new Date(date);
-    if (unit === "days") d.setDate(d.getDate() + amount);
-    if (unit === "months") d.setMonth(d.getMonth() + amount);
-    if (unit === "years") d.setFullYear(d.getFullYear() + amount);
+    if(unit==="days") d.setDate(d.getDate()+amount);
+    if(unit==="months") d.setMonth(d.getMonth()+amount);
+    if(unit==="years") d.setFullYear(d.getFullYear()+amount);
     d.setHours(0,0,0,0);
     return d;
   }
 
-  function show(type, title, expDate, calcDate) {
+  function show(type, title, exp, calc){
     const m = document.getElementById("msg");
     m.className = "msg " + type;
     m.style.display = "block";
-
-    const expStr = expDate ? expDate.toLocaleDateString("en-US") : "";
-    const calcStr = calcDate ? calcDate.toLocaleDateString("en-US") : "";
-
     m.innerHTML = `
-      <div style="font-weight:950; font-size:18px;">${title}</div>
-      ${expDate && calcDate ? `
-        <div class="details">
-          Calculated date: <strong>${calcStr}</strong><br>
-          Expiration date: <strong>${expStr}</strong>
-        </div>` : ``}
-    `;
+      <strong>${title}</strong>
+      <div class="details">
+        Calculated date: <strong>${calc.toLocaleDateString("en-US")}</strong><br>
+        Expiration date: <strong>${exp.toLocaleDateString("en-US")}</strong>
+      </div>`;
   }
 
-  function check(unit) {
-    const expRaw = expInput.value.trim();
+  function check(unit){
+    const expDate = parseUSDate(expInput.value.trim());
     const amount = Number(document.getElementById(unit).value);
 
-    const expDate = parseUSDate(expRaw);
-    if (!expDate) return show("warn", "Invalid date. Use MM/DD/YYYY (example: 01/30/2026).");
+    if(!expDate)
+      return show("warn","Invalid date. Use MM/DD/YYYY.");
 
-    if (!Number.isFinite(amount) || amount < 0) {
-      return show("warn", "Enter a valid number (0 or higher).");
-    }
+    if(!Number.isFinite(amount) || amount < 0)
+      return show("warn","Enter a valid number.");
 
-    const today = new Date();
-    today.setHours(0,0,0,0);
-
+    const today = startOfToday();
     const calc = add(today, Math.floor(amount), unit);
 
-    // Rule: If expiration date is BEFORE calculated date => CREATE A DIP
-    if (expDate < calc) show("bad", "CREATE A DIP", expDate, calc);
-    else show("ok", "OK", expDate, calc);
+    expDate < calc
+      ? show("bad","CREATE A DIP",expDate,calc)
+      : show("ok","OK",expDate,calc);
   }
 </script>
 </body>
