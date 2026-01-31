@@ -1,7 +1,7 @@
 # DIP Calculator – Internal POC
 
 ## Overview
-The DIP Calculator is a small internal web-based tool created as a proof of concept to support operational date calculations related to DIP timelines.
+The DIP Calculator is a small internal web-based tool created as a proof of concept to support operational date calculations related to parts expiration dates.
 
 ## Purpose
 - Reduce manual date calculation errors  
