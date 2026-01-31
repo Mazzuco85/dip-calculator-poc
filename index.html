@@ -111,6 +111,7 @@
     min-width:170px;
   }
 
+  /* SUMMARY AREA */
   .summary{
     margin-left:auto;
     display:flex;
@@ -186,6 +187,7 @@
     class="input-date"
     placeholder="MM/DD/YYYY"
     inputmode="numeric"
+    pattern="[0-9]*"
     autocomplete="off"
     maxlength="10"
   >
@@ -195,7 +197,15 @@
   <div class="block">
     <div class="blockTitle">Days to calculate</div>
     <div class="actionLine">
-      <input type="number" id="days" class="input-small" placeholder="e.g., 320">
+      <input
+        type="number"
+        id="days"
+        class="input-small"
+        placeholder="e.g., 320"
+        inputmode="numeric"
+        pattern="[0-9]*"
+        min="0"
+      >
       <button class="check" onclick="check('days')">CHECK (DAYS)</button>
       <div class="summary">
         <div id="summary-days" class="summaryBox"></div>
@@ -208,7 +218,15 @@
   <div class="block">
     <div class="blockTitle">Months to calculate</div>
     <div class="actionLine">
-      <input type="number" id="months" class="input-small" placeholder="e.g., 6">
+      <input
+        type="number"
+        id="months"
+        class="input-small"
+        placeholder="e.g., 6"
+        inputmode="numeric"
+        pattern="[0-9]*"
+        min="0"
+      >
       <button class="check" onclick="check('months')">CHECK (MONTHS)</button>
       <div class="summary">
         <div id="summary-months" class="summaryBox"></div>
@@ -221,7 +239,15 @@
   <div class="block">
     <div class="blockTitle">Years to calculate</div>
     <div class="actionLine">
-      <input type="number" id="years" class="input-small" placeholder="e.g., 1">
+      <input
+        type="number"
+        id="years"
+        class="input-small"
+        placeholder="e.g., 1"
+        inputmode="numeric"
+        pattern="[0-9]*"
+        min="0"
+      >
       <button class="check" onclick="check('years')">CHECK (YEARS)</button>
       <div class="summary">
         <div id="summary-years" class="summaryBox"></div>
