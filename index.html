@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DIP Calculator</title>
+<title>DIP Calculator v1.7</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
 <style>
@@ -17,7 +17,7 @@
   }
   .app{
     width:100%;
-    max-width:720px;
+    max-width:760px;
     background:#121a2b;
     border-radius:16px;
     padding:16px;
@@ -28,20 +28,17 @@
   .header{
     display:flex;
     justify-content:space-between;
-    align-items:flex-start;
+    align-items:center;
     margin-bottom:12px;
   }
-  h1{
-    margin:0;
-    letter-spacing:.6px;
-  }
+  h1{ margin:0; letter-spacing:.6px; }
   .today{
     font-size:12px;
-    color:rgba(238,242,255,.75);
-    border:1px solid rgba(255,255,255,.18);
+    color:#ffffff;
+    border:1px solid rgba(255,255,255,.25);
     padding:6px 10px;
     border-radius:999px;
-    background:rgba(255,255,255,.05);
+    background:rgba(255,255,255,.12);
     white-space:nowrap;
   }
 
@@ -49,118 +46,121 @@
     display:block;
     margin-top:12px;
     font-weight:800;
-    color:rgba(238,242,255,.82);
+    color:#ffffff;
   }
 
-  /* INPUT BASE */
   input{
     padding:12px;
     font-size:18px;
     border-radius:10px;
-    border:1px solid rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.25);
     background:#1c2540;
     color:#fff;
     outline:none;
   }
   input:focus{
-    box-shadow:0 0 0 4px rgba(122,162,255,.35);
+    box-shadow:0 0 0 4px rgba(122,162,255,.45);
     border-color:transparent;
   }
 
-  /* INPUT SIZES */
-  .input-date{
-    width:220px;
-    max-width:100%;
-  }
-  .input-small{
-    width:140px;
-    max-width:100%;
-  }
+  .input-date{ width:220px; }
+  .input-small{ width:140px; }
 
   .hint{
     font-size:12px;
-    color:rgba(238,242,255,.6);
+    color:rgba(255,255,255,.75);
     margin-top:4px;
   }
 
   .block{
-    margin-top:14px;
+    margin-top:16px;
     padding:12px;
-    border:1px solid rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.18);
     border-radius:12px;
-    background:rgba(255,255,255,.03);
-  }
-
-  .blockHeader{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:10px;
+    background:rgba(255,255,255,.05);
   }
   .blockTitle{
     font-weight:900;
     font-size:13px;
-    color:rgba(238,242,255,.82);
-    letter-spacing:.2px;
+    margin-bottom:8px;
   }
 
-  .row{
+  .actionLine{
     display:flex;
-    align-items:flex-end;
+    align-items:center;        /* 🔑 alignment fix */
     gap:12px;
-    flex-wrap:wrap;
+    flex-wrap:nowrap;          /* 🔑 prevents wrapping */
   }
 
-  button{
+  button.check{
     padding:12px 18px;
     font-size:16px;
     font-weight:950;
     border-radius:10px;
     border:none;
-    background:#fff;
+    background:#ffffff;
     color:#0b1220;
     cursor:pointer;
-    min-width:180px;
+    min-width:170px;
   }
 
-  /* DISCREET RESET */
+  /* SUMMARY AREA */
+  .summary{
+    margin-left:auto;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  .summaryBox{
+    min-width:230px;           /* 🔑 reduced width */
+    max-width:230px;
+    border-radius:10px;
+    padding:10px;              /* 🔑 slightly tighter */
+    display:none;
+    color:#ffffff;
+    font-weight:900;
+  }
+  .summaryBox.show{ display:block; }
+
+  .summary-ok{ background:#0f8f4f; }
+  .summary-bad{ background:#b00020; }
+  .summary-warn{ background:#b37a00; }
+
+  .statusLine{
+    font-size:14px;
+    letter-spacing:.4px;
+    line-height:1.1;
+  }
+
+  .dates{
+    margin-top:4px;
+    font-size:12px;
+    font-weight:700;
+    line-height:1.2;
+  }
+
+  /* RESET */
   .resetLink{
     border:none;
     background:transparent;
-    color:rgba(238,242,255,.55);
+    color:rgba(238,242,255,.65);
     font-size:12px;
     font-weight:800;
     cursor:pointer;
-    padding:4px 6px;
+    padding:6px 8px;
     border-radius:8px;
+    white-space:nowrap;
   }
   .resetLink:hover{
-    color:rgba(238,242,255,.8);
-    background:rgba(255,255,255,.06);
+    color:#ffffff;
+    background:rgba(255,255,255,.12);
   }
 
   .resetAllWrap{
     display:flex;
     justify-content:flex-end;
-    margin-top:10px;
-  }
-
-  .msg{
-    margin-top:14px;
-    padding:14px;
-    border-radius:12px;
-    display:none;
-    border:1px solid rgba(255,255,255,.14);
-  }
-  .ok{background:rgba(24,195,126,.18)}
-  .bad{background:rgba(255,77,109,.16)}
-  .warn{background:rgba(255,209,102,.14)}
-
-  .details{
-    margin-top:8px;
-    font-size:13px;
-    color:rgba(238,242,255,.72);
-    line-height:1.4;
+    margin-top:12px;
   }
 </style>
 </head>
@@ -168,14 +168,12 @@
 <body>
 <div class="app">
 
-  <!-- HEADER -->
   <div class="header">
     <h1>DIP CALCULATOR</h1>
     <div class="today" id="todayBadge"></div>
   </div>
 
-  <!-- EXPIRATION DATE -->
-  <label for="expiration">Expiration Date</label>
+  <label>Expiration Date</label>
   <input
     type="text"
     id="expiration"
@@ -189,50 +187,50 @@
 
   <!-- DAYS -->
   <div class="block">
-    <div class="blockHeader">
-      <div class="blockTitle">Days to calculate</div>
-      <button class="resetLink" type="button" onclick="resetField('days')">Reset</button>
-    </div>
-    <div class="row">
-      <input type="number" id="days" class="input-small" placeholder="e.g., 320" inputmode="numeric" min="0">
-      <button onclick="check('days')">CHECK (DAYS)</button>
+    <div class="blockTitle">Days to calculate</div>
+    <div class="actionLine">
+      <input type="number" id="days" class="input-small" placeholder="e.g., 320">
+      <button class="check" onclick="check('days')">CHECK (DAYS)</button>
+      <div class="summary">
+        <div id="summary-days" class="summaryBox"></div>
+        <button class="resetLink" onclick="resetBlock('days')">Reset</button>
+      </div>
     </div>
   </div>
 
   <!-- MONTHS -->
   <div class="block">
-    <div class="blockHeader">
-      <div class="blockTitle">Months to calculate</div>
-      <button class="resetLink" type="button" onclick="resetField('months')">Reset</button>
-    </div>
-    <div class="row">
-      <input type="number" id="months" class="input-small" placeholder="e.g., 6" inputmode="numeric" min="0">
-      <button onclick="check('months')">CHECK (MONTHS)</button>
+    <div class="blockTitle">Months to calculate</div>
+    <div class="actionLine">
+      <input type="number" id="months" class="input-small" placeholder="e.g., 6">
+      <button class="check" onclick="check('months')">CHECK (MONTHS)</button>
+      <div class="summary">
+        <div id="summary-months" class="summaryBox"></div>
+        <button class="resetLink" onclick="resetBlock('months')">Reset</button>
+      </div>
     </div>
   </div>
 
   <!-- YEARS -->
   <div class="block">
-    <div class="blockHeader">
-      <div class="blockTitle">Years to calculate</div>
-      <button class="resetLink" type="button" onclick="resetField('years')">Reset</button>
-    </div>
-    <div class="row">
-      <input type="number" id="years" class="input-small" placeholder="e.g., 1" inputmode="numeric" min="0">
-      <button onclick="check('years')">CHECK (YEARS)</button>
+    <div class="blockTitle">Years to calculate</div>
+    <div class="actionLine">
+      <input type="number" id="years" class="input-small" placeholder="e.g., 1">
+      <button class="check" onclick="check('years')">CHECK (YEARS)</button>
+      <div class="summary">
+        <div id="summary-years" class="summaryBox"></div>
+        <button class="resetLink" onclick="resetBlock('years')">Reset</button>
+      </div>
     </div>
   </div>
 
-  <!-- DISCREET RESET ALL -->
   <div class="resetAllWrap">
-    <button class="resetLink" type="button" onclick="resetAll()">Reset all</button>
+    <button class="resetLink" onclick="resetAll()">Reset all</button>
   </div>
 
-  <div id="msg" class="msg"></div>
 </div>
 
 <script>
-  /* TODAY BADGE */
   function startOfToday(){
     const d = new Date();
     d.setHours(0,0,0,0);
@@ -241,30 +239,11 @@
   document.getElementById("todayBadge").textContent =
     "Today: " + startOfToday().toLocaleDateString("en-US");
 
-  /* DATE MASK MM/DD/YYYY */
   const expInput = document.getElementById("expiration");
-
-  function formatUSDateDigits(d){
-    return d
-      .slice(0,8)
-      .replace(/^(\d{2})(\d)/,"$1/$2")
-      .replace(/^(\d{2}\/\d{2})(\d)/,"$1/$2");
-  }
-
   expInput.addEventListener("input", e=>{
-    const el = e.target;
-    const start = el.selectionStart ?? el.value.length;
-    const digitsBefore = el.value.slice(0,start).replace(/\D/g,"").length;
-    const digits = el.value.replace(/\D/g,"").slice(0,8);
-    const formatted = formatUSDateDigits(digits);
-    el.value = formatted;
-
-    let caret=0, seen=0;
-    while(caret<formatted.length && seen<digitsBefore){
-      if(/\d/.test(formatted[caret])) seen++;
-      caret++;
-    }
-    el.setSelectionRange(caret,caret);
+    const d = e.target.value.replace(/\D/g,"").slice(0,8);
+    e.target.value = d.replace(/^(\d{2})(\d)/,"$1/$2")
+                      .replace(/^(\d{2}\/\d{2})(\d)/,"$1/$2");
   });
 
   function parseUSDate(v){
@@ -285,55 +264,43 @@
     return d;
   }
 
-  function show(type, title, exp, calc){
-    const m = document.getElementById("msg");
-    m.className = "msg " + type;
-    m.style.display = "block";
-    m.innerHTML = `
-      <strong>${title}</strong>
-      <div class="details">
-        Calculated date: <strong>${calc.toLocaleDateString("en-US")}</strong><br>
-        Expiration date: <strong>${exp.toLocaleDateString("en-US")}</strong>
-      </div>`;
+  function renderSummary(unit, type, exp, calc, message){
+    const box = document.getElementById("summary-" + unit);
+    box.className = "summaryBox show summary-" + type;
+    box.innerHTML = type === "warn"
+      ? `<div class="statusLine">${message}</div>`
+      : `<div class="statusLine">${message}</div>
+         <div class="dates">
+           Calc: ${calc.toLocaleDateString("en-US")}<br>
+           Exp: ${exp.toLocaleDateString("en-US")}
+         </div>`;
   }
 
   function check(unit){
-    const expDate = parseUSDate(expInput.value.trim());
+    const exp = parseUSDate(expInput.value.trim());
     const amount = Number(document.getElementById(unit).value);
 
-    if(!expDate)
-      return show("warn","Invalid date. Use MM/DD/YYYY.");
-
+    if(!exp) return renderSummary(unit,"warn",null,null,"Invalid date");
     if(!Number.isFinite(amount) || amount < 0)
-      return show("warn","Enter a valid number.");
+      return renderSummary(unit,"warn",null,null,"Invalid number");
 
-    const today = startOfToday();
-    const calc = add(today, Math.floor(amount), unit);
-
-    expDate < calc
-      ? show("bad","CREATE A DIP",expDate,calc)
-      : show("ok","OK",expDate,calc);
+    const calc = add(startOfToday(), Math.floor(amount), unit);
+    exp < calc
+      ? renderSummary(unit,"bad",exp,calc,"CREATE A DIP")
+      : renderSummary(unit,"ok",exp,calc,"OK");
   }
 
-  /* DISCREET RESET FUNCTIONS */
-  function resetField(fieldId){
-    document.getElementById(fieldId).value = "";
-    // keep the result visible (useful), but if you prefer to clear it too:
-    // clearMessage();
+  function resetBlock(unit){
+    document.getElementById(unit).value = "";
+    const box = document.getElementById("summary-" + unit);
+    box.className = "summaryBox";
+    box.innerHTML = "";
   }
 
   function resetAll(){
     expInput.value = "";
-    ["days","months","years"].forEach(id => document.getElementById(id).value = "");
-    clearMessage();
+    ["days","months","years"].forEach(u => resetBlock(u));
     expInput.focus();
-  }
-
-  function clearMessage(){
-    const m = document.getElementById("msg");
-    m.style.display = "none";
-    m.className = "msg";
-    m.innerHTML = "";
   }
 </script>
 </body>
