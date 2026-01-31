@@ -180,85 +180,100 @@
     <div class="today" id="todayBadge"></div>
   </div>
 
-  <label>Part Expiration Date</label>
-  <input
-    type="text"
-    id="expiration"
-    class="input-date"
-    placeholder="MM/DD/YYYY"
-    inputmode="numeric"
-    pattern="[0-9]*"
-    autocomplete="off"
-    maxlength="10"
-  >
-  <div class="hint">Type numbers only. Slashes are added automatically.</div>
+  <!-- ✅ form wrapper helps iOS standalone keyboard behavior -->
+  <form onsubmit="return false;">
+    <label>Part Expiration Date</label>
+    <input
+      type="text"
+      id="expiration"
+      class="input-date"
+      placeholder="MM/DD/YYYY"
+      inputmode="numeric"
+      pattern="[0-9]*"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+      maxlength="10"
+    >
+    <div class="hint">Type numbers only. Slashes are added automatically.</div>
 
-  <!-- DAYS -->
-  <div class="block">
-    <div class="blockTitle">Days to calculate</div>
-    <div class="actionLine">
-      <input
-        type="number"
-        id="days"
-        class="input-small"
-        placeholder="e.g., 320"
-        inputmode="numeric"
-        pattern="[0-9]*"
-        min="0"
-      >
-      <button class="check" onclick="check('days')">CHECK (DAYS)</button>
-      <div class="summary">
-        <div id="summary-days" class="summaryBox"></div>
-        <button class="resetLink" onclick="resetBlock('days')">Reset</button>
+    <!-- DAYS -->
+    <div class="block">
+      <div class="blockTitle">Days to calculate</div>
+      <div class="actionLine">
+        <input
+          type="text"
+          id="days"
+          class="input-small"
+          placeholder="e.g., 320"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+        >
+        <button class="check" type="button" onclick="check('days')">CHECK (DAYS)</button>
+        <div class="summary">
+          <div id="summary-days" class="summaryBox"></div>
+          <button class="resetLink" type="button" onclick="resetBlock('days')">Reset</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- MONTHS -->
-  <div class="block">
-    <div class="blockTitle">Months to calculate</div>
-    <div class="actionLine">
-      <input
-        type="number"
-        id="months"
-        class="input-small"
-        placeholder="e.g., 6"
-        inputmode="numeric"
-        pattern="[0-9]*"
-        min="0"
-      >
-      <button class="check" onclick="check('months')">CHECK (MONTHS)</button>
-      <div class="summary">
-        <div id="summary-months" class="summaryBox"></div>
-        <button class="resetLink" onclick="resetBlock('months')">Reset</button>
+    <!-- MONTHS -->
+    <div class="block">
+      <div class="blockTitle">Months to calculate</div>
+      <div class="actionLine">
+        <input
+          type="text"
+          id="months"
+          class="input-small"
+          placeholder="e.g., 6"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+        >
+        <button class="check" type="button" onclick="check('months')">CHECK (MONTHS)</button>
+        <div class="summary">
+          <div id="summary-months" class="summaryBox"></div>
+          <button class="resetLink" type="button" onclick="resetBlock('months')">Reset</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- YEARS -->
-  <div class="block">
-    <div class="blockTitle">Years to calculate</div>
-    <div class="actionLine">
-      <input
-        type="number"
-        id="years"
-        class="input-small"
-        placeholder="e.g., 1"
-        inputmode="numeric"
-        pattern="[0-9]*"
-        min="0"
-      >
-      <button class="check" onclick="check('years')">CHECK (YEARS)</button>
-      <div class="summary">
-        <div id="summary-years" class="summaryBox"></div>
-        <button class="resetLink" onclick="resetBlock('years')">Reset</button>
+    <!-- YEARS -->
+    <div class="block">
+      <div class="blockTitle">Years to calculate</div>
+      <div class="actionLine">
+        <input
+          type="text"
+          id="years"
+          class="input-small"
+          placeholder="e.g., 1"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+        >
+        <button class="check" type="button" onclick="check('years')">CHECK (YEARS)</button>
+        <div class="summary">
+          <div id="summary-years" class="summaryBox"></div>
+          <button class="resetLink" type="button" onclick="resetBlock('years')">Reset</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="resetAllWrap">
-    <button class="resetLink" onclick="resetAll()">Reset all</button>
-  </div>
+    <div class="resetAllWrap">
+      <button class="resetLink" type="button" onclick="resetAll()">Reset all</button>
+    </div>
+  </form>
 
 </div>
 
@@ -271,6 +286,32 @@
   document.getElementById("todayBadge").textContent =
     "Today: " + startOfToday().toLocaleDateString("en-US");
 
+  // ✅ iOS standalone keyboard fix: force focus on touch/click
+  function forceFocus(el){
+    try { el.focus({ preventScroll: true }); } catch(e){ el.focus(); }
+    // Ensure it’s visible; helps iOS decide to show the keyboard
+    setTimeout(() => {
+      try { el.scrollIntoView({ block: "center", inline: "nearest" }); } catch(e){}
+    }, 0);
+  }
+
+  function bindKeyboardFix(id){
+    const el = document.getElementById(id);
+    if(!el) return;
+
+    // touchend is the most reliable for iOS
+    el.addEventListener("touchend", (ev) => {
+      ev.preventDefault();
+      forceFocus(el);
+    }, { passive: false });
+
+    // fallback for click
+    el.addEventListener("click", () => forceFocus(el));
+  }
+
+  ["expiration","days","months","years"].forEach(bindKeyboardFix);
+
+  // Expiration date mask MM/DD/YYYY
   const expInput = document.getElementById("expiration");
   expInput.addEventListener("input", e=>{
     const d = e.target.value.replace(/\D/g,"").slice(0,8);
@@ -308,9 +349,16 @@
          </div>`;
   }
 
+  function getNumericValue(id){
+    const raw = (document.getElementById(id).value || "").trim();
+    if(raw === "") return NaN;
+    if(!/^\d+$/.test(raw)) return NaN;
+    return Number(raw);
+  }
+
   function check(unit){
     const exp = parseUSDate(expInput.value.trim());
-    const amount = Number(document.getElementById(unit).value);
+    const amount = getNumericValue(unit);
 
     if(!exp) return renderSummary(unit,"warn",null,null,"Invalid date");
     if(!Number.isFinite(amount) || amount < 0)
@@ -332,7 +380,7 @@
   function resetAll(){
     expInput.value = "";
     ["days","months","years"].forEach(u => resetBlock(u));
-    expInput.focus();
+    forceFocus(expInput);
   }
 </script>
 </body>
